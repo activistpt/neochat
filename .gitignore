@@ -8,3 +8,13 @@ npm-debug.log*
 .DS_Store
 *.tgz
 .cache/
+
+# Android build outputs (regenerate with android/build-apk.sh)
+android/build/
+*.class
+*.dex
+
+# Signed APK artefacts (regenerate with build-apk.sh)
+*.apk
+*.apk.idsig
+*.keystore
