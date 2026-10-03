@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  neochat:
+    build: .
+    ports:
+      - "0.0.0.0:3000:3000"
+      - "0.0.0.0:3001:3001"  # Tor service port
+      - "0.0.0.0:3002:3002"  # Mesh network port
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - TOR_PORT=3001
+      - MESH_PORT=3002
+      - ENCRYPTION_ENABLED=true
+      - ANONYMOUS_MODE=true
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - neochat-net
+    security_opt:
+      - no-new-privileges:true
+
+  tor-proxy:
+    image: dperson/torproxy
+    ports:
+      - "9050:9050"   # SOCKS proxy
+      - "9051:9051"   # Control port
+    environment:
+      - TOR_SOCKS_HOST=0.0.0.0
+    restart: unless-stopped
+    networks:
+      - neochat-net
+
+  irc-bridge:
+    build: 
+      context: .
+      dockerfile: Dockerfile.irc
+    ports:
+      - "6697:6697"
+    environment:
+      - IRC_SERVER=neochat.itch.io
+      - IRC_PORT=6697
+    depends_on:
+      - neochat
+    restart: unless-stopped
+    networks:
+      - neochat-net
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+      - ./public:/usr/share/nginx/html
+    depends_on:
+      - neochat
+    restart: unless-stopped
+    networks:
+      - neochat-net
+
+  mesh-coordinator:
+    build:
+      context: .
+      dockerfile: Dockerfile.mesh
+    ports:
+      - "4444:4444/udp"  # WiFi mesh discovery
+      - "5555:5555/udp"  # Bluetooth LE discovery
+    depends_on:
+      - neochat
+    restart: unless-stopped
+    networks:
+      - neochat-net
+
+networks:
+  neochat-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

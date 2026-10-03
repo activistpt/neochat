@@ -1,0 +1,15 @@
+[settings]
+root = "."
+
+[deploy]
+build = { builder = "DOCKERFILE" }
+startCommand = "node server.js"
+
+[env]
+NODE_ENV = "production"
+ORIGIN = "*"
+
+[services.neochat-web]
+type = "web"
+port = 3000
+restart = "on-failure"

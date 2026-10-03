@@ -1,0 +1,32 @@
+{
+    "name": "NEOCHAT - Cyberpunk Anonymous Chat",
+    "short_name": "neochat",
+    "version": "1.0.0",
+    "description": "Cyberpunk anonymous encrypted chat with WiFi scanner, GPS maps of Portugal, and mesh networking based on MeshCore protocol.",
+    "itch": {
+        "game_id": "neochat",
+        "display_name": "NEOCHAT",
+        "price": 0,
+        "tags": ["chat", "cyberpunk", "encrypted", "anonymous", "wifi", "gps", "mesh-network", "portugal"],
+        "html": true,
+        "embed": true
+    },
+    "build": {
+        "source_dirs": ["public/"],
+        "output_dir": "dist/",
+        "files": [
+            "public/index.html",
+            "public/styles.css",
+            "public/crypto.js",
+            "public/wifi-networks-pt.json",
+            "chat.js"
+        ]
+    },
+    "deployment": {
+        "backend": "separate_server",
+        "backend_url": "http://localhost:3000",
+        "websocket_url": "http://localhost:3000",
+        "itch_url": "https://neochat.itch.io/neochat",
+        "instructions": "1. Start backend: node server.js (or PORT=3000 node server.js). 2. Frontend is served from /api/status and / on the same server. 3. For itch.io: Upload public/ contents as HTML5 build, configure CHAT_SERVER_URL in index.html to point to backend."
+    }
+}

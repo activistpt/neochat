@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEOCHAT - Cyberpunk Anonymous Chat</title>
+    <link rel="icon" href="data:,">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <!-- Configuration for deployment -->
+    <script>
+        // Set CHAT_SERVER_URL to your backend server for itch.io or cross-origin deployments
+        // On same-origin deployments (e.g., localhost:3000), this is auto-detected
+        window.CHAT_SERVER_URL = window.CHAT_SERVER_URL || window.location.origin;
+    </script>
+    <!-- Matrix rain background -->
+    <div id="matrix-rain"></div>
+    
+    <!-- Scanning overlay -->
+    <div class="scan-overlay"></div>
+    
+    <!-- Main app container -->
+    <div id="app-container">
+        <!-- Connection screen -->
+        <div id="connection-screen" class="screen active">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-dot" style="background:#ff4444"></span>
+                    <span class="terminal-dot" style="background:#ffaa00"></span>
+                    <span class="terminal-dot" style="background:#44ff44"></span>
+                    <span class="terminal-title">NEOCHAT v1.0.0</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="terminal-content">
+                        <h1 class="glitch" data-text="NEOCHAT">NEOCHAT</h1>
+                        <p class="terminal-subtitle">> CYBERPUNK ANONYMOUS CHAT PLATFORM</p>
+                        
+                        <div class="form-group">
+                            <input type="text" id="nickname" class="terminal-input" 
+                                   placeholder="NICKNAME > " maxlength="20" autocomplete="off">
+                            <div class="neon-border">
+                                <span></span><span></span><span></span><span></span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <input type="text" id="channel" class="terminal-input" 
+                                   placeholder="CHANNEL_ID > #neochat" maxlength="50" autocomplete="off">
+                            <div class="neon-border">
+                                <span></span><span></span><span></span><span></span>
+                            </div>
+                            <button id="create-channel" class="neon-button">CRIAR_CANAL</button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="terminal-label">
+                                <input type="checkbox" id="encryption-toggle" class="terminal-checkbox">
+                                <span class="neon-text">CRIPTODO_RETO</span>
+                            </label>
+                        </div>
+                        
+                        <button id="connect-btn" class="neon-button pulse">CONECTAR</button>
+                        
+                        <div class="terminal-status" id="connection-status">
+                            <span class="status-dot offline"></span>
+                            <span class="status-text">DESCONECTADO</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chat screen -->
+        <div id="chat-screen" class="screen">
+            <div class="chat-container">
+                <!-- Chat header -->
+                <div class="chat-header">
+                    <div class="terminal-header">
+                        <span class="terminal-dot" style="background:#44ff44"></span>
+                        <span class="terminal-dot" style="background:#ff4444"></span>
+                        <span class="terminal-dot" style="background:#ffaa00"></span>
+                        <span class="terminal-title">NEOCHAT :: {channel}</span>
+                    </div>
+                    
+                    <div class="chat-actions">
+                        <button id="irc-bridge" class="neon-button small">PUENTE_IRC</button>
+                        <button id="tor-service" class="neon-button small">SERVICIO_TOR</button>
+                        <button id="mesh-network" class="neon-button small">MALLA_OFFGRID</button>
+                        <button id="wifi-scanner" class="neon-button small">ESCANEADOR_WIFI</button>
+                        <button id="gps-map" class="neon-button small">MAPA_GPS</button>
+                        <button id="disconnect-btn" class="neon-button small danger">DESCONECTAR</button>
+                    </div>
+                </div>
+                
+                <!-- User list panel -->
+                <div class="main-content">
+                    <!-- Messages area -->
+                    <div id="messages" class="messages-area">
+                        <div class="message-welcome">
+                            <div class="terminal-text">> Bem-vindo ao NEOCHAT</div>
+                            <div class="terminal-text">> Conexão encriptada: AES-256-GCM</div>
+                            <div class="terminal-text">> Canal: <span id="channel-name">#neochat</span></div>
+                            <div class="terminal-text">> Tipo: <span id="channel-type">OFFLINE</span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Message input -->
+                    <div class="input-container">
+                        <div class="neon-border">
+                            <span></span><span></span><span></span><span></span>
+                        </div>
+                        <div class="input-row">
+                            <input type="text" id="message-input" class="terminal-input" 
+                                   placeholder="DIGITE MENSAGEM [ENTER] > " maxlength="2000" autocomplete="off">
+                            <button id="send-btn" class="neon-button">ENVIAR</button>
+                        </div>
+                        
+                        <!-- Status indicators -->
+                        <div class="status-bar">
+                            <div class="status-indicators">
+                                <span class="indicator" id="encryption-indicator">
+                                    <span class="dot green"></span> CRIPTO
+                                </span>
+                                <span class="indicator" id="tor-indicator">
+                                    <span class="dot red">●</span> TOR
+                                </span>
+                                <span class="indicator" id="mesh-indicator">
+                                    <span class="dot yellow"></span> MESH
+                                </span>
+                            </div>
+                            <div class="connection-info">
+                                <span class="terminal-text">> LATÊNCIA: <span id="latency">0ms</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <div class="sidebar-header">USUÁRIOS_ONLINE</div>
+                    <div id="user-list" class="user-list">
+                        <!-- Users will be populated here -->
+                    </div>
+                    
+                    <div class="sidebar-section">
+                        <div class="sidebar-header">REDE</div>
+                        <div class="network-status">
+                            <div class="network-item">
+                                <span class="dot red"></span> Tor: DESCONECTADO
+                            </div>
+                            <div class="network-item">
+                                <span class="dot yellow"></span> Mesh: PRONTO
+                            </div>
+                            <div class="network-item">
+                                <span class="dot green"></span> IRC: PRONTO
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="sidebar-section">
+                        <div class="sidebar-header">CONFIGURAÇÕES</div>
+                        <div class="config-options">
+                            <button id="theme-toggle" class="neon-button small">TEMA: CYBERPUNK</button>
+                            <button id="qr-code" class="neon-button small">QR_CODE</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- WiFi Scanner Modal -->
+    <div id="wifi-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-dot" style="background:#44ff44"></span>
+                    <span class="terminal-dot" style="background:#ffaa00"></span>
+                    <span class="terminal-dot" style="background:#ff4444"></span>
+                    <span class="terminal-title">ESCANEADOR_WIFI</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="terminal-text">> Escaneando redes WiFi públicas em Portugal...</div>
+                    <div id="wifi-scan-results" class="user-list">
+                        <!-- WiFi networks will be populated here -->
+                    </div>
+                    <div class="terminal-text" id="wifi-status">> Pronto para escanear</div>
+                    <button id="wifi-scan-btn" class="neon-button small">ESCANEAR_REDES</button>
+                    <button id="wifi-close" class="neon-button small">FECHAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GPS/Map Modal -->
+    <div id="gps-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 800px; max-height: 600px;">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-dot" style="background:#44ff44"></span>
+                    <span class="terminal-dot" style="background:#ffaa00"></span>
+                    <span class="terminal-dot" style="background:#ff4444"></span>
+                    <span class="terminal-title">MAPA_GPS_PORTUGAL</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="terminal-text">> Localização atual e redes WiFi próximas</div>
+                    <div class="terminal-text" id="gps-location">> LAT: --- | LNG: ---</div>
+                    <div id="wifi-map" style="width: 100%; height: 400px; background: #0a0a1a; border: 1px solid #00ff44; margin: 10px 0; position: relative;">
+                        <!-- Map will be rendered here -->
+                        <div style="position: absolute; top: 10px; left: 10px; color: #00ff44; font-size: 12px;">📍 Portugal Continental</div>
+                    </div>
+                    <div id="wifi-map-legend" class="terminal-text">
+                        > <span style="color:#ff4444">●</span> Rede Aberta | <span style="color:#ffaa00">●</span> WPA2 Conhecida | <span style="color:#44ff44">●</span> Rede Segura
+                    </div>
+                    <button id="gps-close" class="neon-button small">FECHAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="irc-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-dot" style="background:#ff4444"></span>
+                    <span class="terminal-dot" style="background:#ffaa00"></span>
+                    <span class="terminal-dot" style="background:#44ff44"></span>
+                    <span class="terminal-title">PUENTE_IRC</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="form-group">
+                        <input type="text" id="irc-server" class="terminal-input" placeholder="SERVIDOR_IRC > irc.hack.chat" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <input type="number" id="irc-port" class="terminal-input" placeholder="PORTA > 6667" value="6667">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="irc-nick" class="terminal-input" placeholder="NICK_IRC > neonuser" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="irc-channel" class="terminal-input" placeholder="CANAL_IRC > #neochat" autocomplete="off">
+                    </div>
+                    <button id="irc-connect-btn" class="neon-button">CONECTAR_IRC</button>
+                    <button id="irc-close" class="neon-button small">FECHAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="tor-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-dot" style="background:#ff4444"></span>
+                    <span class="terminal-dot" style="background:#ffaa00"></span>
+                    <span class="terminal-dot" style="background:#44ff44"></span>
+                    <span class="terminal-title">SERVICIO_TOR</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="terminal-text">> GERANDO ENDEREÇO .ONION...</div>
+                    <div id="onion-address" class="terminal-text">
+                        > aguarde...
+                    </div>
+                    <div class="terminal-text">> Compartilhe este endereço com outros usuários NEOCHAT</div>
+                    <button id="tor-close" class="neon-button small">FECHAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="mesh-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="terminal-window">
+                <div class="terminal-header">
+                    <span class="terminal-dot" style="background:#44ff44"></span>
+                    <span class="terminal-dot" style="background:#ffaa00"></span>
+                    <span class="terminal-dot" style="background:#ff4444"></span>
+                    <span class="terminal-title">MALLA_OFFGRID</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="terminal-text">> Status: ATIVANDO MESH NETWORK</div>
+                    <div id="mesh-status" class="terminal-text">
+                        > Escaneando dispositivos próximos...
+                    </div>
+                    <div id="mesh-devices" class="user-list">
+                        <!-- Nearby mesh devices -->
+                    </div>
+                    <button id="mesh-close" class="neon-button small">FECHAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/crypto.js"></script>
+    <script src="/config.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/chat.js"></script>
+</body>
+</html>
