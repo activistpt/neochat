@@ -2,13 +2,11 @@ services:
   - type: web
     name: neochat-backend
     runtime: node
+    plan: free
     buildCommand: npm install
     startCommand: node server.js
     healthCheckPath: /api/status
+    autoDeploy: true
     envVars:
-      - key: PORT
-        value: 10000
       - key: NODE_ENV
         value: production
-    domains:
-      - neochat.onrender.com
