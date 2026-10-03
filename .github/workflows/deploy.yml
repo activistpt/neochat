@@ -21,12 +21,12 @@ jobs:
           node-version: '20'
           cache: 'npm'
       
-      - name: Install Dependencies
-        run: npm install
-      
+      - name: Install Railway CLI
+        run: curl -fsSL https://railway.com/install.sh | sh
+
       - name: Deploy to Railway
-        uses: railwayapp/cli-action@v8
-        with:
-          api-token: ${{ secrets.RAILWAY_TOKEN }}
-          service: worker
-          railway_options: link --project ${{ secrets.RAILWAY_PROJECT_ID }}
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          railway link --project ${{ secrets.RAILWAY_PROJECT_ID }} --service worker --environment production
+          railway up --service worker --detach
