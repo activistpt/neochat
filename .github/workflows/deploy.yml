@@ -1,12 +1,9 @@
-name: 🚂 Deploy to Railway
+name: Deploy to Railway
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
-
-env:
-  RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
 jobs:
   deploy:
@@ -14,15 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-      
+
       - name: Install Railway CLI
-        run: curl -fsSL https://railway.com/install.sh | sh
+        run: |
+          curl -fsSL https://railway.com/install.sh | sh
+          echo "$HOME/.railway/bin" >> "$GITHUB_PATH"
 
       - name: Deploy to Railway
         env:
