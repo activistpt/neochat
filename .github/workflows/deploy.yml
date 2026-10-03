@@ -28,5 +28,5 @@ jobs:
         uses: railwayapp/cli-action@v8
         with:
           api-token: ${{ secrets.RAILWAY_TOKEN }}
-          service: neochat-backend
+          service: worker
           railway_options: link --project ${{ secrets.RAILWAY_PROJECT_ID }}
